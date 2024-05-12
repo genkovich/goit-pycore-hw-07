@@ -18,8 +18,11 @@ class Name(Field):
 class Phone(Field):
     def __init__(self, value):
         if (len(value) < 10) or (len(value) > 15):
-            raise ValueError("Phone number must be between 10 and 15 digits")
+            raise RecordValueError("Phone number must be between 10 and 15 digits")
         super().__init__(value)
+
+    def __str__(self):
+        return f"{self.value}"
 
 
 class Birthday(Field):
@@ -27,7 +30,7 @@ class Birthday(Field):
         try:
             value = datetime.strptime(value, "%d.%m.%Y")
         except ValueError:
-            raise ValueError("Invalid date format. Use DD.MM.YYYY")
+            raise RecordValueError("Invalid date format. Use DD.MM.YYYY")
 
         super().__init__(value)
 
@@ -56,16 +59,19 @@ class Record:
 
         return result
 
-    def remove_phone(self, phone):
-        phone_value = self.find_phone(phone)
-        self.phones.remove(phone_value)
+    def remove_phone(self, phone_number):
+        phone = self.find_phone(phone_number)
+        if not phone:
+            raise RecordValueError("No such phone number")
+
+        self.phones.remove(phone)
 
     def __str__(self):
         return f"Contact name: {self.name.value}, phones: {'; '.join(p.value for p in self.phones)}"
 
     def add_birthday(self, birthday):
         if self.birthday:
-            raise ValueError("Birthday already exists")
+            raise RecordValueError("Birthday already exists")
 
         self.birthday = Birthday(birthday)
 
@@ -75,7 +81,10 @@ class AddressBook(UserDict):
         self.data[record.name.value] = record
 
     def find(self, name):
-        return self.data[name]
+        try:
+            return self.data[name]
+        except KeyError:
+            return None
 
     def delete(self, name):
         del self.data[name]
@@ -100,3 +109,7 @@ class AddressBook(UserDict):
                 upcoming_birthdays.append(tmp_data)
 
         return upcoming_birthdays
+
+
+class RecordValueError(Exception):
+    pass

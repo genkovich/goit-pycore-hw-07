@@ -1,51 +1,44 @@
-from address_book import Record, AddressBook
+from input_parser import parse_input
+from address_book import AddressBook
+import phone_base
 
 
 def main():
-    # Створення нової адресної книги
     book = AddressBook()
+    print("Welcome to the assistant bot!")
+    while True:
+        user_input = input("Enter a command: ").strip().lower()
+        command, *args = parse_input(user_input)
 
-    # Створення запису для John
-    john_record = Record("John")
-    john_record.add_phone("1234567890")
-    john_record.add_phone("5555555555")
+        if command in ["close", "exit"]:
+            print("Good bye!")
+            break
 
-    # Додавання запису John до адресної книги
-    book.add_record(john_record)
-
-    # Створення та додавання нового запису для Jane
-    jane_record = Record("Jane")
-    jane_record.add_phone("9876543210")
-    book.add_record(jane_record)
-
-    # Виведення всіх записів у книзі
-    for name, record in book.data.items():
-        print(record)
-
-    # Знаходження та редагування телефону для John
-    john = book.find("John")
-    john.edit_phone("1234567890", "1112223333")
-
-    print(john)  # Виведення: Contact name: John, phones: 1112223333; 5555555555
-
-    # Пошук конкретного телефону у записі John
-    found_phone = john.find_phone("5555555555")
-    print(f"{john.name}: {found_phone}")  # Виведення: 5555555555
-
-    john.remove_phone("5555555555")  # Видалення телефону 5555555555
-    print(john)  # Виведення: Contact name: John, phones: 1112223333
-
-    # Видалення запису Jane
-    book.delete("Jane")
-
-    print(book.data)  # Виведення: {'John': <record.Record object at 0x7f8f3c4f4d30>}
-
-    john.add_birthday("15.05.1990")
-    book.add_record(john)
-
-    birthdays = book.get_upcoming_birthdays()
-    print("Список привітань на цьому тижні:", birthdays)
+        elif command == "hello":
+            print("How can I help you?")
+        elif command == "add":
+            result = phone_base.add_contact(args, book)
+            print(result)
+        elif command == "change":
+            result = phone_base.change_contact(args, book)
+            print(result)
+        elif command == "phone":
+            result = phone_base.show_phone(args, book)
+            print(result)
+        elif command == "all":
+            phone_base.show_contacts(book)
+        elif command == "add-birthday":
+            result = phone_base.add_birthday(args, book)
+            print(result)
+        elif command == "show-birthday":
+            result = phone_base.show_birthday(args, book)
+            print(result)
+        elif command == "birthdays":
+            result = phone_base.birthdays(book)
+            print(result)
+        else:
+            print("Invalid command.")
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
